@@ -129,4 +129,415 @@
         canvas {
             background: #111827;
             border: 4px solid #374151;
-            
+            border-radius: 12px;
+            box-shadow: 0 0 40px rgba(0, 0, 0, 0.9);
+            max-width: 95vw;
+            max-height: 75vh;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- القائمة الرئيسية -->
+    <div id="menuScreen" class="screen">
+        <div class="arcade-badge">🕹️ RETRO ARCADE HUB</div>
+        <h1>ألعاب التلفاز | TV Games</h1>
+        <p class="subtitle">اختر لعبتك الكلاسيكية المفضلة وابدأ المغامرة</p>
+        <div class="grid">
+            <div class="card" tabindex="0" onclick="startGame('snake')">
+                <span class="card-icon">🐍</span>
+                <h3>لعبة الثعبان</h3>
+                <p>Snake Classic</p>
+            </div>
+            <div class="card" tabindex="0" onclick="startGame('fruit')">
+                <span class="card-icon">🍉</span>
+                <h3>تقطيع الفواكه</h3>
+                <p>Fruit Slash</p>
+            </div>
+            <div class="card" tabindex="0" onclick="startGame('miner')">
+                <span class="card-icon">⛏️</span>
+                <h3>منقب الذهب</h3>
+                <p>Gold Miner</p>
+            </div>
+            <div class="card" tabindex="0" onclick="startGame('bubbles')">
+                <span class="card-icon">🫧</span>
+                <h3>فرقعة البالونات</h3>
+                <p>Bubble Pop</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- شاشة اللعب -->
+    <div id="gameScreen" class="screen hidden">
+        <div class="top-bar">
+            <button class="back-btn" onclick="returnToMenu()">↩ الرجوع للقائمة</button>
+            <div class="score-board">النقاط: <span id="scoreVal">0</span></div>
+        </div>
+        <canvas id="gameCanvas" width="800" height="500"></canvas>
+        <p class="hint-text" id="gameHint"></p>
+    </div>
+
+    <script>
+        const menuScreen = document.getElementById('menuScreen');
+        const gameScreen = document.getElementById('gameScreen');
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const scoreVal = document.getElementById('scoreVal');
+        const gameHint = document.getElementById('gameHint');
+
+        let animationId = null;
+        let gameInterval = null;
+        let score = 0;
+
+        function updateScore(pts) {
+            score += pts;
+            scoreVal.innerText = score;
+        }
+
+        function resetEngine() {
+            clearInterval(gameInterval);
+            cancelAnimationFrame(animationId);
+            window.onkeydown = null;
+            canvas.onmousemove = null;
+            canvas.onclick = null;
+            canvas.ontouchmove = null;
+            canvas.ontouchstart = null;
+            score = 0;
+            scoreVal.innerText = '0';
+        }
+
+        function startGame(type) {
+            resetEngine();
+            menuScreen.classList.add('hidden');
+            gameScreen.classList.remove('hidden');
+
+            if (type === 'snake') initSnake();
+            else if (type === 'fruit') initFruit();
+            else if (type === 'miner') initMiner();
+            else if (type === 'bubbles') initBubbles();
+        }
+
+        function returnToMenu() {
+            resetEngine();
+            gameScreen.classList.add('hidden');
+            menuScreen.classList.remove('hidden');
+        }
+
+        // 1. لعبة الثعبان (Snake)
+        function initSnake() {
+            gameHint.innerText = "استخدم الأسهم في الكيبورد أو الريموت لتوجيه الثعبان";
+            const box = 20;
+            let snake = [{x: 10 * box, y: 10 * box}];
+            let food = {
+                x: Math.floor(Math.random() * 38 + 1) * box,
+                y: Math.floor(Math.random() * 23 + 1) * box
+            };
+            let d = "RIGHT";
+
+            window.onkeydown = (e) => {
+                if (e.key === "ArrowLeft" && d !== "RIGHT") d = "LEFT";
+                else if (e.key === "ArrowUp" && d !== "DOWN") d = "UP";
+                else if (e.key === "ArrowRight" && d !== "LEFT") d = "RIGHT";
+                else if (e.key === "ArrowDown" && d !== "UP") d = "DOWN";
+            };
+
+            gameInterval = setInterval(() => {
+                ctx.fillStyle = "#111827";
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                ctx.strokeStyle = "#1f2937";
+                for (let i = 0; i < canvas.width; i += box) {
+                    ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, canvas.height); ctx.stroke();
+                }
+                for (let j = 0; j < canvas.height; j += box) {
+                    ctx.beginPath(); ctx.moveTo(0, j); ctx.lineTo(canvas.width, j); ctx.stroke();
+                }
+
+                ctx.fillStyle = "#ef4444";
+                ctx.beginPath();
+                ctx.arc(food.x + box/2, food.y + box/2, box/2 - 2, 0, Math.PI * 2);
+                ctx.fill();
+
+                for (let i = 0; i < snake.length; i++) {
+                    ctx.fillStyle = (i === 0) ? "#34d399" : "#10b981";
+                    ctx.fillRect(snake[i].x + 1, snake[i].y + 1, box - 2, box - 2);
+                }
+
+                let snakeX = snake[0].x;
+                let snakeY = snake[0].y;
+
+                if (d === "LEFT") snakeX -= box;
+                if (d === "UP") snakeY -= box;
+                if (d === "RIGHT") snakeX += box;
+                if (d === "DOWN") snakeY += box;
+
+                if (snakeX < 0) snakeX = canvas.width - box;
+                if (snakeX >= canvas.width) snakeX = 0;
+                if (snakeY < 0) snakeY = canvas.height - box;
+                if (snakeY >= canvas.height) snakeY = 0;
+
+                if (snakeX === food.x && snakeY === food.y) {
+                    updateScore(10);
+                    food = {
+                        x: Math.floor(Math.random() * 38 + 1) * box,
+                        y: Math.floor(Math.random() * 23 + 1) * box
+                    };
+                } else {
+                    snake.pop();
+                }
+
+                let newHead = {x: snakeX, y: snakeY};
+
+                if (snake.some(seg => seg.x === newHead.x && seg.y === newHead.y)) {
+                    alert("انتهت اللعبة! مجموع نقاطك: " + score);
+                    returnToMenu();
+                    return;
+                }
+                snake.unshift(newHead);
+            }, 110);
+        }
+
+        // 2. لعبة تقطيع الفواكه (Fruit Slash)
+        function initFruit() {
+            gameHint.innerText = "مرر المؤشر أو إصبعك فوق الفواكه لتقطيعها!";
+            const emojis = ["🍉", "🍎", "🍌", "🍊", "🍓", "🍍"];
+            let fruits = [];
+            let spawnTimer = 0;
+
+            function sliceCheck(clientX, clientY) {
+                const rect = canvas.getBoundingClientRect();
+                const scaleX = canvas.width / rect.width;
+                const scaleY = canvas.height / rect.height;
+                const mx = (clientX - rect.left) * scaleX;
+                const my = (clientY - rect.top) * scaleY;
+
+                fruits.forEach(f => {
+                    if (!f.sliced && Math.hypot(mx - f.x, my - f.y) < 40) {
+                        f.sliced = true;
+                        updateScore(15);
+                    }
+                });
+            }
+
+            canvas.onmousemove = (e) => sliceCheck(e.clientX, e.clientY);
+            canvas.ontouchmove = (e) => {
+                e.preventDefault();
+                sliceCheck(e.touches[0].clientX, e.touches[0].clientY);
+            };
+
+            function loop() {
+                ctx.fillStyle = "#111827";
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                spawnTimer++;
+                if (spawnTimer % 45 === 0) {
+                    fruits.push({
+                        x: Math.random() * (canvas.width - 100) + 50,
+                        y: canvas.height + 30,
+                        vx: (Math.random() - 0.5) * 4,
+                        vy: -(Math.random() * 5 + 11),
+                        emoji: emojis[Math.floor(Math.random() * emojis.length)],
+                        sliced: false
+                    });
+                }
+
+                ctx.font = "45px Arial";
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+
+                fruits.forEach((f, idx) => {
+                    f.x += f.vx;
+                    f.y += f.vy;
+                    f.vy += 0.25;
+
+                    if (!f.sliced) {
+                        ctx.fillText(f.emoji, f.x, f.y);
+                    } else {
+                        ctx.fillStyle = "#fbbf24";
+                        ctx.font = "bold 22px Arial";
+                        ctx.fillText("💥 +15", f.x, f.y);
+                        ctx.font = "45px Arial";
+                    }
+
+                    if (f.y > canvas.height + 60) fruits.splice(idx, 1);
+                });
+
+                animationId = requestAnimationFrame(loop);
+            }
+            loop();
+        }
+
+        // 3. لعبة منقب الذهب (Gold Miner)
+        function initMiner() {
+            gameHint.innerText = "اضغط على الشاشة أو زر المسافة/Enter لإطلاق الخطاف وصيد الذهب!";
+            let angle = 0;
+            let dir = 1;
+            let state = "SWING";
+            let hookLen = 50;
+            let caughtGold = null;
+
+            let golds = [];
+            for (let i = 0; i < 8; i++) {
+                golds.push({
+                    x: Math.random() * 680 + 60,
+                    y: Math.random() * 260 + 180,
+                    r: Math.random() * 15 + 15,
+                    val: 50
+                });
+            }
+
+            function triggerHook() {
+                if (state === "SWING") state = "EXTEND";
+            }
+
+            canvas.onclick = triggerHook;
+            window.onkeydown = (e) => {
+                if (e.code === "Space" || e.key === "Enter") triggerHook();
+            };
+
+            function loop() {
+                ctx.fillStyle = "#1c1917";
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                golds.forEach(g => {
+                    ctx.beginPath();
+                    ctx.arc(g.x, g.y, g.r, 0, Math.PI * 2);
+                    ctx.fillStyle = "#f59e0b";
+                    ctx.fill();
+                    ctx.strokeStyle = "#fef08a";
+                    ctx.lineWidth = 3;
+                    ctx.stroke();
+                });
+
+                const originX = canvas.width / 2;
+                const originY = 40;
+
+                if (state === "SWING") {
+                    angle += 0.025 * dir;
+                    if (angle > 1.2 || angle < -1.2) dir *= -1;
+                } else if (state === "EXTEND") {
+                    hookLen += 7;
+                    const hx = originX + Math.sin(angle) * hookLen;
+                    const hy = originY + Math.cos(angle) * hookLen;
+
+                    for (let i = 0; i < golds.length; i++) {
+                        let g = golds[i];
+                        if (Math.hypot(hx - g.x, hy - g.y) < g.r + 10) {
+                            caughtGold = g;
+                            golds.splice(i, 1);
+                            state = "RETRACT";
+                            break;
+                        }
+                    }
+                    if (hx < 0 || hx > canvas.width || hy > canvas.height) state = "RETRACT";
+                } else if (state === "RETRACT") {
+                    hookLen -= caughtGold ? 4 : 8;
+                    if (hookLen <= 50) {
+                        hookLen = 50;
+                        if (caughtGold) {
+                            updateScore(Math.round(caughtGold.r * 3));
+                            caughtGold = null;
+                            if (golds.length === 0) {
+                                alert("رائع! جمعت كل الذهب! نقاطك: " + score);
+                                returnToMenu();
+                                return;
+                            }
+                        }
+                        state = "SWING";
+                    }
+                }
+
+                const endX = originX + Math.sin(angle) * hookLen;
+                const endY = originY + Math.cos(angle) * hookLen;
+
+                ctx.strokeStyle = "#9ca3af";
+                ctx.lineWidth = 4;
+                ctx.beginPath();
+                ctx.moveTo(originX, originY);
+                ctx.lineTo(endX, endY);
+                ctx.stroke();
+
+                ctx.fillStyle = "#e5e7eb";
+                ctx.beginPath();
+                ctx.arc(endX, endY, 8, 0, Math.PI * 2);
+                ctx.fill();
+
+                if (caughtGold) {
+                    ctx.beginPath();
+                    ctx.arc(endX, endY + caughtGold.r, caughtGold.r, 0, Math.PI * 2);
+                    ctx.fillStyle = "#f59e0b";
+                    ctx.fill();
+                }
+
+                animationId = requestAnimationFrame(loop);
+            }
+            loop();
+        }
+
+        // 4. لعبة فرقعة البالونات (Bubble Pop)
+        function initBubbles() {
+            gameHint.innerText = "اضغط على البالونات لفرقعتها قبل أن تختفي!";
+            const colors = ["#ef4444", "#3b82f6", "#10b981", "#f59e0b", "#a855f7"];
+            let bubbles = [];
+
+            for (let i = 0; i < 12; i++) {
+                bubbles.push({
+                    x: Math.random() * (canvas.width - 80) + 40,
+                    y: canvas.height + Math.random() * 300,
+                    r: Math.random() * 15 + 22,
+                    speed: Math.random() * 2 + 1.5,
+                    color: colors[Math.floor(Math.random() * colors.length)]
+                });
+            }
+
+            function popCheck(clientX, clientY) {
+                const rect = canvas.getBoundingClientRect();
+                const scaleX = canvas.width / rect.width;
+                const scaleY = canvas.height / rect.height;
+                const mx = (clientX - rect.left) * scaleX;
+                const my = (clientY - rect.top) * scaleY;
+
+                bubbles.forEach(b => {
+                    if (Math.hypot(mx - b.x, my - b.y) < b.r + 10) {
+                        updateScore(10);
+                        b.y = canvas.height + 50;
+                        b.x = Math.random() * (canvas.width - 80) + 40;
+                    }
+                });
+            }
+
+            canvas.onclick = (e) => popCheck(e.clientX, e.clientY);
+            canvas.ontouchstart = (e) => {
+                e.preventDefault();
+                popCheck(e.touches[0].clientX, e.touches[0].clientY);
+            };
+
+            function loop() {
+                ctx.fillStyle = "#0f172a";
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                bubbles.forEach(b => {
+                    b.y -= b.speed;
+                    if (b.y < -40) {
+                        b.y = canvas.height + 40;
+                        b.x = Math.random() * (canvas.width - 80) + 40;
+                    }
+
+                    ctx.beginPath();
+                    ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+                    ctx.fillStyle = b.color;
+                    ctx.fill();
+
+                    ctx.beginPath();
+                    ctx.arc(b.x - b.r * 0.3, b.y - b.r * 0.3, b.r * 0.25, 0, Math.PI * 2);
+                    ctx.fillStyle = "rgba(255,255,255,0.4)";
+                    ctx.fill();
+                });
+
+                animationId = requestAnimationFrame(loop);
+            }
+            loop();
+        }
+    </script>
+</body>
+</html>
