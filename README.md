@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>منصة الألعاب الكلاسيكية الواقعية</title>
+    <<title>ألعاب التلفاز | TV Games</title>>منصة الألعاب الكلاسيكية الواقعية</>
     <style>
         * {
             margin: 0;
